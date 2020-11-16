@@ -17,35 +17,54 @@
                     </v-btn>
             </v-card-title>
 
-            <v-data-table :headers="headers" :items="todos" :search="search">
-                <template v-slot:[`item.actions`]="{ item }">
-                    <v-btn small class="mr-2" @click="editItem(item)">
-                        edit
-                    </v-btn>
-                    <v-btn small @click="deleteItem(item)">
-                        delete
-                    </v-btn>
-                    
-                </template>
-            </v-data-table>
+            <template v-slot:[`item.priority`]="{ item }">
+                    <td>
+                        <v-card v-if="item.priority == 'Penting'" style="border-color: lightcoral; color: lightcoral; width: fit-content;" outlined>
+                            {{ item.priority }}
+                        </v-card>
+                        <v-card v-else-if="item.priority == 'Biasa'" style="border-color: lightblue; color: lightblue; width: fit-content;" outlined>
+                            {{ item.priority }}
+                        </v-card>
+                        <v-card v-else outlined style="border-color: lightgreen; color: lightgreen; width: fit-content;">
+                            {{ item.priority }}
+                        </v-card>
+                    </td>
+            </template>
+
+            <template v-slot:[`item.actions`]="{ item }">
+
+                    <v-icon small class="icnote mr-2" @click="detailItem(item)">{{ icons.mdiTextBoxSearchOutline}}</v-icon>
+                    <v-icon small class="pencil mr-2" @click="editItem(item)">  {{ icons.mdiPencil }}</v-icon>
+                    <v-icon small class="bin mr-2" @click="deleteItem(item)">   {{ icons.mdiDelete }}</v-icon>
+
+            </template>
         </v-card>
 
         <v-dialog v-model="dialog" persistent max-width="600px">
             <v-card>
                 <v-card-title>
-                    <span class="headline">Form Todo</span>
+                    <span class="headline" 
+                        v-if="adding == true" >
+                           Form Todo - Add
+                    </span>
+                    <span class="headline" 
+                        v-else>
+                           Form Todo - Edit
+                    </span>
                 </v-card-title>
+
                 <v-card-text>
                     <v-container>
                         <v-text-field
                             v-model="formTodo.task"
                             label="Task"
                             required
+                            autofocus
                         ></v-text-field>
 
                         <v-select
                             v-model="formTodo.priority"
-                            :items="['Penting','Biasa','Tidak Penting']"
+                            :items="['Penting', 'Biasa', 'Tidak penting']"
                             label="Priority"
                             required
                         ></v-select>
@@ -55,40 +74,9 @@
                             label="Note"
                             required
                         ></v-textarea>
-
-                        <v-chip
-                            v-if="chip2"
-                            class="ma-2"
-                            close
-                            color="red"
-                            text-color="white"
-                            >
-                            Penting
-                            </v-chip>
-
-                            <v-chip
-                            v-if="chip3"
-                            class="ma-2"
-                            close
-                            color="green"
-                            outlined
-                            >
-                            Biasa
-                            </v-chip>
-
-                            <v-chip
-                            v-if="chip4"
-                            class="ma-2"
-                            close
-                            color="orange"
-                            label
-                            outlined
-                            >
-                            Tidak Penting
-                            </v-chip>
-                        
-                    </v-container>
+                    </v-container>    
                 </v-card-text>
+                        
                 <v-card-actions>
                     <v-spacer></v-spacer>
                     <v-btn color="blue darken-1" text @click="cancel">
@@ -98,21 +86,61 @@
                         Save
                     </v-btn>
                 </v-card-actions>
+                    <v-spacer></v-spacer>
+                    
+                    <v-btn color="blue darken-1" text @click="cancel">
+                        Cancel
+                    </v-btn>
+
+                    <v-btn v-if="adding == true" 
+                        color="blue darken-1" 
+                        text 
+                        @click="save">
+                        Save
+                    </v-btn>
+
+                    <v-btn v-else 
+                        color="blue darken-1" 
+                        text 
+                        @click="edit(formTodo)">
+                        Save
+                    </v-btn>
+
             </v-card>
         </v-dialog>
     </v-main>
 </template>
 <script>
+
+import {
+    mdiPencil,
+    mdiDelete,
+    mdiTextBoxSearchOutline,
+} from '@mdi/js'
+
 export default {
     name: "List",
     data() {
         return {
-            chip1: true,
-            chip2: true,
-            chip3: true,
-            chip4: true,      
             search: null,
+            searchp: "All Priority",
+            adding: true,
+            edititem: null,
             dialog: false,
+            dialogdel: false,
+            dialognote: false,
+    
+            icons: {
+                mdiPencil,
+                mdiDelete,
+                mdiTextBoxSearchOutline,
+            },
+
+            filters: {
+                search: '',
+                priority: '',
+            },
+
             headers: [
                 {
                     text: "Task",
@@ -120,9 +148,17 @@ export default {
                     sortable: true,
                     value: "task",
                 },
-                { text: "Priority", value: "priority" },
-                { text: "Note", value: "note" },
-                { text: "Actions", value: "actions" },
+                
+                { 
+                    text: "Priority",
+                    field: "priority", 
+                    value: "priority" 
+                },
+                { 
+                    text: "Actions", 
+                    value: "actions", 
+                    sortable: false,
+                },
             ],
             todos: [
                 {
@@ -146,6 +182,11 @@ export default {
                 priority: null,
                 note: null
             },
+            detail: {
+                task: null,
+                priority: null,
+                note: null,
+            }
         };
     },
     methods: {
@@ -186,4 +227,8 @@ export default {
     },
 };
 </script>
-
+<style scoped>
+.icnote{color: plum !important;}
+.pencil{color: lightblue !important;}
+.bin{color: lightcoral !important;}
+</style>

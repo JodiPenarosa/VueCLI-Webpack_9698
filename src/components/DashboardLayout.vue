@@ -42,6 +42,7 @@
                     {title: "Dashboard", to: "/"},
                     {title: "GD", to: "/gd"},
                     {title: "UGD", to: "/ugd"},
+                    {title: "Tugas", to: "/tugas"},
                 ],
             };
         },
